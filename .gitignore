@@ -1,7 +1,9 @@
 .coverage
 .mypy_cache
+dist
 docs
 htmlcov
 venv
+*.egg-info
 *.pyc
 *__pycache__*
