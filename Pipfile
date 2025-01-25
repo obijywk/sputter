@@ -10,6 +10,7 @@ black = "*"
 mypy = "*"
 pylint = "*"
 pdoc = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.10"

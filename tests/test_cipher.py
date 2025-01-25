@@ -11,12 +11,14 @@ class CipherTestCase(unittest.TestCase):
     def test_vigenere(self):
         """Test the Vigenere cipher implementation."""
         self.assertEqual(cipher.vigenere_encrypt("ABC", "B"), "BCD")
+        self.assertEqual(cipher.vigenere_encrypt("ABC DEF", "B"), "BCD EFG")
         self.assertEqual(cipher.vigenere_encrypt("XYZ", "B"), "YZA")
         self.assertEqual(
             cipher.vigenere_encrypt("ATTACKATDAWN", "LEMON"), "LXFOPVEFRNHR"
         )
 
         self.assertEqual(cipher.vigenere_decrypt("BCD", "B"), "ABC")
+        self.assertEqual(cipher.vigenere_decrypt("BCD EFG", "B"), "ABC DEF")
         self.assertEqual(cipher.vigenere_decrypt("YZA", "B"), "XYZ")
         self.assertEqual(
             cipher.vigenere_decrypt("LXFOPVEFRNHR", "LEMON"), "ATTACKATDAWN"
