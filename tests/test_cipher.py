@@ -23,3 +23,8 @@ class CipherTestCase(unittest.TestCase):
         self.assertEqual(
             cipher.vigenere_decrypt("LXFOPVEFRNHR", "LEMON"), "ATTACKATDAWN"
         )
+
+    def test_caesar(self):
+        """Test the Caesar shift implementation."""
+        self.assertEqual(cipher.caesar_shift("FUSION", 6), "LAYOUT")
+        self.assertEqual(cipher.caesar_shift("LAYOUT", -6), "FUSION")
