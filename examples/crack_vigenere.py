@@ -1,9 +1,9 @@
 """Example program to crack a Vigenere cipher."""
 
-from texput.cipher import vigenere_decrypt
-from texput.fitness import QuadgramStatistics
-from texput.mung import uppercase_only
-from texput.optimize import brute_force
+from sputter.cipher import vigenere_decrypt
+from sputter.fitness import QuadgramStatistics
+from sputter.mung import uppercase_only
+from sputter.optimize import brute_force
 
 
 def main():

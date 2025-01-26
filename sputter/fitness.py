@@ -14,7 +14,7 @@ class QuadgramStatistics:
             with open(filepath, encoding="utf-8") as f:
                 lines = f.readlines()
         else:
-            data_file = importlib.resources.files("texput.data").joinpath(
+            data_file = importlib.resources.files("sputter.data").joinpath(
                 "english_quadgrams.txt.gz"
             )
             lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")
@@ -66,7 +66,7 @@ class WordStatistics:
             with open(filepath, encoding="utf-8") as f:
                 lines = f.readlines()
         else:
-            data_file = importlib.resources.files("texput.data").joinpath(
+            data_file = importlib.resources.files("sputter.data").joinpath(
                 "english_words_50k.txt.gz"
             )
             lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")

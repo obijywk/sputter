@@ -1,9 +1,9 @@
 """Example program to crack a Caesar cipher."""
 
-from texput.cipher import caesar_shift
-from texput.fitness import QuadgramStatistics
-from texput.mung import uppercase_only
-from texput.optimize import brute_force
+from sputter.cipher import caesar_shift
+from sputter.fitness import QuadgramStatistics
+from sputter.mung import uppercase_only
+from sputter.optimize import brute_force
 
 
 def main():

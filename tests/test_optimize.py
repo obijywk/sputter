@@ -3,7 +3,7 @@
 import random
 import unittest
 
-from texput import optimize
+from sputter import optimize
 
 
 class OptimizeTestCase(unittest.TestCase):

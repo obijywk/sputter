@@ -2,7 +2,7 @@
 
 import unittest
 
-from texput import mung
+from sputter import mung
 
 
 class MungTestCase(unittest.TestCase):

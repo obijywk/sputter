@@ -2,7 +2,7 @@
 
 import unittest
 
-from texput import fitness
+from sputter import fitness
 
 
 class QuadgramStatisticsTestCase(unittest.TestCase):

@@ -2,7 +2,7 @@
 
 import unittest
 
-from texput import cipher
+from sputter import cipher
 
 
 class CipherTestCase(unittest.TestCase):
