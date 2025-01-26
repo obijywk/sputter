@@ -26,5 +26,25 @@ class CipherTestCase(unittest.TestCase):
 
     def test_caesar(self):
         """Test the Caesar shift implementation."""
-        self.assertEqual(cipher.caesar_shift("FUSION", 6), "LAYOUT")
+        self.assertEqual(cipher.caesar_shift("FUS ION", 6), "LAY OUT")
         self.assertEqual(cipher.caesar_shift("LAYOUT", -6), "FUSION")
+
+    def test_substitution(self):
+        """Test the substitution cipher implementation."""
+        key = cipher.substitution_generate_random_key()
+        self.assertEqual(len(key), 26)
+        self.assertEqual(len(set(key)), 26)
+        ciphertext = cipher.substitution_encrypt("FLEE AT ONCE", key)
+        self.assertEqual(cipher.substitution_decrypt(ciphertext, key), "FLEE AT ONCE")
+
+    def test_substitution_permute_key(self):
+        """Test the substitution cipher key permutation function."""
+        key = cipher.substitution_generate_random_key()
+        self.assertEqual(len(key), 26)
+        self.assertEqual(len(set(key)), 26)
+
+        permuted_key = cipher.substitution_permute_key(key)
+        self.assertEqual(len(permuted_key), 26)
+        self.assertEqual(len(set(permuted_key)), 26)
+        self.assertNotEqual(key, permuted_key)
+        self.assertEqual(sorted(list(permuted_key)), sorted(list(key)))

@@ -22,3 +22,25 @@ class QuadgramStatisticsTestCase(unittest.TestCase):
         self.assertGreater(
             self.qs.string_score("THISISATEST"), self.qs.string_score("QXZJVJIAOLOX")
         )
+
+
+class WordStatisticsTestCase(unittest.TestCase):
+    """Tests for the WordStatistics class."""
+
+    def setUp(self):
+        self.ws = fitness.WordStatistics()
+
+    def test_word_log_prob(self):
+        """Test that word log probabilities are computed correctly."""
+        self.assertGreater(self.ws.word_log_prob("THIS"), self.ws.word_log_prob("RARE"))
+
+    def test_spaced_string_score(self):
+        """Test that the score of a common string is greater than that of a rare one."""
+        self.assertGreater(
+            self.ws.spaced_string_score("THIS IS A TEST"),
+            self.ws.spaced_string_score("RARE TERMS USED INTERNALLY"),
+        )
+        self.assertGreater(
+            self.ws.spaced_string_score("RARE TERMS USED INTERNALLY"),
+            self.ws.spaced_string_score("QXJZV VJWXZ QZVJ QXJV"),
+        )

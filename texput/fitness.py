@@ -56,3 +56,59 @@ class QuadgramStatistics:
         for i in range(len(s) - 3):
             score += self.quadgram_log_prob(s[i : i + 4])
         return score
+
+
+class WordStatistics:
+    """Determine text language likelihood based on word frequency."""
+
+    def __init__(self, filepath: Optional[str] = None):
+        if filepath:
+            with open(filepath, encoding="utf-8") as f:
+                lines = f.readlines()
+        else:
+            data_file = importlib.resources.files("texput.data").joinpath(
+                "english_words_50k.txt.gz"
+            )
+            lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")
+        word_freq = {}
+        total = 0
+        for line in lines:
+            if line:
+                word, freq = line.split()
+                int_freq = int(freq)
+                word_freq[word] = int_freq
+                total += int_freq
+        self._floor = math.log(0.01 / total)
+        self._word_log_prob = {
+            word: math.log(freq / total) for word, freq in word_freq.items()
+        }
+
+    def word_log_prob(self, word: str) -> float:
+        """Return the log probability of the word.
+
+        If the word is not in the dictionary, return the floor value.
+
+        :param word: The word to get the log probability of.
+            Must be all uppercase.
+
+        :return: The log probability of the word.
+        """
+        return self._word_log_prob.get(word, self._floor)
+
+    def spaced_string_score(self, s: str) -> float:
+        """Return the log probability score of the string s.
+
+        s must contain spaces between words.
+
+        Larger scores indicate higher likelihood of the string being in the language.
+
+        :param s: The string to score. Must only contain uppercase letters and spaces.
+
+        :return: The log probability score of the string s.
+        """
+        score = 0.0
+        for word in s.split(" "):
+            if not word:
+                continue
+            score += self.word_log_prob(word)
+        return score

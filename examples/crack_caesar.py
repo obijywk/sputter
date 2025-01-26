@@ -13,7 +13,7 @@ def main():
     ciphertext_no_spaces = uppercase_only(ciphertext)
 
     def objective(shift):
-        return qs.string_score(caesar_shift(ciphertext_no_spaces, shift))
+        return -qs.string_score(caesar_shift(ciphertext_no_spaces, shift))
 
     results = brute_force(objective, range(26))
     for shift, score in results:

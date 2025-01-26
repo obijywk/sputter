@@ -19,7 +19,7 @@ def main():
     ciphertext = "LXFOPVEFRNHR"
 
     def objective(k):
-        return qs.string_score(vigenere_decrypt(ciphertext, k))
+        return -qs.string_score(vigenere_decrypt(ciphertext, k))
 
     results = brute_force(objective, candidates)
     for key, score in results:
