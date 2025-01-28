@@ -42,18 +42,23 @@ class QuadgramStatistics:
         :param quadgram: The quadgram to get the log probability of.
             Must be exactly 4 characters long, all uppercase.
 
-        :return: The log probability of the quadgram.
+        :return: The log probability of the quadgram. Returned values are in the range
+            of negative infinity to zero, where negative infinity is the least likely
+            probability and zero is the most likely probability.
         """
         return self._quadgram_log_prob.get(quadgram, self._floor)
 
     def string_score(self, s: str) -> float:
         """Return the log probability score of the string s.
 
-        Larger scores indicate higher likelihood of the string being in the language.
+        Greater scores indicate higher likelihood of the string being in the language.
 
-        :param s: The string to score. Must only contain uppercase letters.
+        :param s: The string to score. Must be at least four characters long and
+            only contain uppercase letters.
 
-        :return: The log probability score of the string s.
+        :return: The log probability score of the string s. Returned values are in the
+            range of negative infinity to zero, where negative infinity is the least
+            likely probability and zero is the most likely probability.
         """
         score = 0.0
         for i in range(len(s) - 3):
@@ -80,8 +85,10 @@ class WordStatistics:
         for line in lines:
             if line:
                 word, freq = line.split()
-                word = re.sub(non_letter_re, "", word.upper())
                 if not word:
+                    continue
+                word = word.upper()
+                if re.search(non_letter_re, word):
                     continue
                 int_freq = int(freq)
                 word_freq[word] = int_freq
@@ -101,12 +108,13 @@ class WordStatistics:
 
         If the word is not in the dictionary, return the floor value.
 
-        :param word: The word to get the log probability of.
-            Must be all uppercase.
+        :param word: The word to get the log probability of. Must be all uppercase.
         :param scale_floor_to_word_length: If True, scale the floor value based on the
             length of the word.
 
-        :return: The log probability of the word.
+        :return: The log probability of the word. Returned values are in the range
+            of negative infinity to zero, where negative infinity is the least likely
+            probability and zero is the most likely probability.
         """
         if scale_floor_to_word_length:
             floor = self._floor * len(word) / self._average_word_length
@@ -123,7 +131,9 @@ class WordStatistics:
 
         :param s: The string to score. Must only contain uppercase letters and spaces.
 
-        :return: The log probability score of the string s.
+        :return: The log probability score of the string s. Returned values are in the
+            range of negative infinity to zero, where negative infinity is the least
+            likely probability and zero is the most likely probability.
         """
         score = 0.0
         for word in s.split(" "):
