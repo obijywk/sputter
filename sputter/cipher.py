@@ -4,7 +4,7 @@ import itertools
 import random
 
 
-ORD_A = ord("A")
+__ORD_A = ord("A")
 
 
 def vigenere_encrypt(plaintext: str, key: str) -> str:
@@ -15,11 +15,11 @@ def vigenere_encrypt(plaintext: str, key: str) -> str:
 
     :return: The encrypted ciphertext.
     """
-    key_iter = itertools.cycle([ord(c) - ORD_A for c in key.upper()])
+    key_iter = itertools.cycle([ord(c) - __ORD_A for c in key.upper()])
     ciphertext = ""
     for c in plaintext.upper():
         if c.isalpha():
-            ciphertext += chr((ord(c) - ORD_A + next(key_iter)) % 26 + ORD_A)
+            ciphertext += chr((ord(c) - __ORD_A + next(key_iter)) % 26 + __ORD_A)
         else:
             ciphertext += c
     return ciphertext
@@ -33,11 +33,11 @@ def vigenere_decrypt(ciphertext: str, key: str) -> str:
 
     :return: The decrypted plaintext.
     """
-    key_iter = itertools.cycle([ord(c) - ORD_A for c in key.upper()])
+    key_iter = itertools.cycle([ord(c) - __ORD_A for c in key.upper()])
     plaintext = ""
     for c in ciphertext.upper():
         if c.isalpha():
-            plaintext += chr((ord(c) - ORD_A - next(key_iter)) % 26 + ORD_A)
+            plaintext += chr((ord(c) - __ORD_A - next(key_iter)) % 26 + __ORD_A)
         else:
             plaintext += c
     return plaintext
@@ -54,7 +54,7 @@ def caesar_shift(text: str, shift: int) -> str:
     shifted_text = ""
     for c in text.upper():
         if c.isalpha():
-            shifted_text += chr((ord(c) - ORD_A + shift) % 26 + ORD_A)
+            shifted_text += chr((ord(c) - __ORD_A + shift) % 26 + __ORD_A)
         else:
             shifted_text += c
     return shifted_text
@@ -71,7 +71,7 @@ def substitution_encrypt(plaintext: str, key: str) -> str:
     ciphertext = ""
     for c in plaintext.upper():
         if c.isalpha():
-            ciphertext += key[ord(c) - ORD_A]
+            ciphertext += key[ord(c) - __ORD_A]
         else:
             ciphertext += c
     return ciphertext
@@ -88,7 +88,7 @@ def substitution_decrypt(ciphertext: str, key: str) -> str:
     plaintext = ""
     for c in ciphertext.upper():
         if c.isalpha():
-            plaintext += chr(key.index(c) + ORD_A)
+            plaintext += chr(key.index(c) + __ORD_A)
         else:
             plaintext += c
     return plaintext
