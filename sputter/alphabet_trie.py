@@ -9,6 +9,7 @@ class AlphabetTrieNode:
     """A node in a trie where each node represents a letter of the alphabet."""
 
     value: Optional[float] = None
+    min_descendant_value: Optional[float] = None
     children: List[Optional["AlphabetTrieNode"]] = field(
         default_factory=lambda: [None] * 26
     )
@@ -26,6 +27,8 @@ class AlphabetTrieNode:
 
     def insert(self, word: str, value: float):
         """Insert a word into the trie."""
+        if self.min_descendant_value is None or value < self.min_descendant_value:
+            self.min_descendant_value = value
         if not word:
             self.value = value
             return
