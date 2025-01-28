@@ -33,6 +33,10 @@ class WordStatisticsTestCase(unittest.TestCase):
     def test_word_log_prob(self):
         """Test that word log probabilities are computed correctly."""
         self.assertGreater(self.ws.word_log_prob("THIS"), self.ws.word_log_prob("RARE"))
+        self.assertEqual(self.ws.word_log_prob("ZXQ"), self.ws.word_log_prob("ZXQJ"))
+        self.assertGreater(
+            self.ws.word_log_prob("ZXQ", True), self.ws.word_log_prob("ZXQJ", True)
+        )
 
     def test_spaced_string_score(self):
         """Test that the score of a common string is greater than that of a rare one."""

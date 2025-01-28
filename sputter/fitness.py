@@ -72,28 +72,39 @@ class WordStatistics:
             lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")
         word_freq = {}
         total = 0
+        word_lengths_total = 0
         for line in lines:
             if line:
                 word, freq = line.split()
                 int_freq = int(freq)
                 word_freq[word] = int_freq
                 total += int_freq
+                word_lengths_total += int_freq * len(word)
         self._floor = math.log(0.01 / total)
         self._word_log_prob = {
             word: math.log(freq / total) for word, freq in word_freq.items()
         }
+        self._average_word_length = word_lengths_total / total
 
-    def word_log_prob(self, word: str) -> float:
+    def word_log_prob(
+        self, word: str, scale_floor_to_word_length: bool = False
+    ) -> float:
         """Return the log probability of the word.
 
         If the word is not in the dictionary, return the floor value.
 
         :param word: The word to get the log probability of.
             Must be all uppercase.
+        :param scale_floor_to_word_length: If True, scale the floor value based on the
+            length of the word.
 
         :return: The log probability of the word.
         """
-        return self._word_log_prob.get(word, self._floor)
+        if scale_floor_to_word_length:
+            floor = self._floor * len(word) / self._average_word_length
+        else:
+            floor = self._floor
+        return self._word_log_prob.get(word, floor)
 
     def spaced_string_score(self, s: str) -> float:
         """Return the log probability score of the string s.
