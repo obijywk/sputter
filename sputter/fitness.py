@@ -3,7 +3,10 @@
 import gzip
 import importlib.resources
 import math
+import re
 from typing import Optional
+
+from sputter.alphabet_trie import AlphabetTrieNode
 
 
 class QuadgramStatistics:
@@ -70,12 +73,16 @@ class WordStatistics:
                 "english_words_50k.txt.gz"
             )
             lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")
+        non_letter_re = re.compile(r"[^A-Z]")
         word_freq = {}
         total = 0
         word_lengths_total = 0
         for line in lines:
             if line:
                 word, freq = line.split()
+                word = re.sub(non_letter_re, "", word.upper())
+                if not word:
+                    continue
                 int_freq = int(freq)
                 word_freq[word] = int_freq
                 total += int_freq
@@ -85,6 +92,7 @@ class WordStatistics:
             word: math.log(freq / total) for word, freq in word_freq.items()
         }
         self._average_word_length = word_lengths_total / total
+        self._trie: Optional[AlphabetTrieNode] = None
 
     def word_log_prob(
         self, word: str, scale_floor_to_word_length: bool = False
@@ -123,3 +131,11 @@ class WordStatistics:
                 continue
             score += self.word_log_prob(word)
         return score
+
+    def trie(self) -> AlphabetTrieNode:
+        """Return a trie of all words containing their log probabilities."""
+        if not self._trie:
+            self._trie = AlphabetTrieNode()
+            for word, log_prob in self._word_log_prob.items():
+                self._trie.insert(word, log_prob)
+        return self._trie

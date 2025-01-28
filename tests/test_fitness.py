@@ -48,3 +48,11 @@ class WordStatisticsTestCase(unittest.TestCase):
             self.ws.spaced_string_score("RARE TERMS USED INTERNALLY"),
             self.ws.spaced_string_score("QXJZV VJWXZ QZVJ QXJV"),
         )
+
+    def test_trie(self):
+        """Test that the trie is built correctly."""
+        trie = self.ws.trie()
+        self.assertEqual(trie, self.ws.trie())
+        self.assertEqual(trie.subtrie("THIS").value, self.ws.word_log_prob("THIS"))
+        self.assertEqual(trie.subtrie("RARE").value, self.ws.word_log_prob("RARE"))
+        self.assertIsNone(trie.subtrie("ZXQ"))
