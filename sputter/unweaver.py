@@ -1,7 +1,6 @@
 """A module for separating multiple interspersed words."""
 
 from dataclasses import dataclass
-import heapq
 from typing import List, Optional, Tuple
 
 from sputter.alphabet_trie import AlphabetTrieNode
@@ -62,8 +61,8 @@ def unweave(
                 if new_node is not None:
                     node_score = node.value or node.min_descendant_value
                     new_node_score = new_node.value or new_node.min_descendant_value
-                    if not node_score or not new_node_score:
-                        continue
+                    assert node_score is not None
+                    assert new_node_score is not None
                     new_nodes = (
                         self.trie_nodes[:i] + [new_node] + self.trie_nodes[i + 1 :]
                     )
@@ -74,15 +73,15 @@ def unweave(
                 new_node = trie.subtrie(c)
                 if new_node is not None:
                     new_node_score = new_node.value or new_node.min_descendant_value
-                    if new_node_score:
-                        new_score = self.score - new_node_score
-                        new_states.append(
-                            State(
-                                new_score,
-                                self.trie_nodes + [new_node],
-                                self.words + [c],
-                            )
+                    assert new_node_score is not None
+                    new_score = self.score - new_node_score
+                    new_states.append(
+                        State(
+                            new_score,
+                            self.trie_nodes + [new_node],
+                            self.words + [c],
                         )
+                    )
             return new_states
 
         def is_complete(self) -> bool:
@@ -98,12 +97,8 @@ def unweave(
                 word_set = tuple(sorted(new_state.words))
                 if word_set not in word_sets:
                     word_sets.add(word_set)
-                    heapq.heappush(new_states, new_state)
-        if config.state_size_limit:
-            states = heapq.nsmallest(config.state_size_limit, new_states)
-        else:
-            states = new_states
-
+                    new_states.append(new_state)
+        states = sorted(new_states)[: config.state_size_limit]
     states = [
         state
         for state in states
@@ -111,5 +106,5 @@ def unweave(
         and (not config.min_words or len(state.words) >= config.min_words)
     ]
     if top_n:
-        states = heapq.nsmallest(top_n, states)
+        states = states[:top_n]
     return [(state.words, state.score) for state in states]

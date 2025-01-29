@@ -1,6 +1,5 @@
 """A module for inserting spaces into unspaced text."""
 
-import heapq
 from typing import List, Optional, Tuple
 
 from sputter.fitness import WordStatistics
@@ -38,8 +37,8 @@ def space(
                     + ws.word_log_prob(state[-1], True)
                     - ws.word_log_prob(new_words[-1], True)
                 )
-                heapq.heappush(new_states, (new_score, new_words))
-            heapq.heappush(new_states, (score - ws.word_log_prob(c, True), state + [c]))
-        states = heapq.nsmallest(state_size_limit, new_states)
+                new_states.append((new_score, new_words))
+            new_states.append((score - ws.word_log_prob(c, True), state + [c]))
+        states = sorted(new_states)[:state_size_limit]
 
     return [(" ".join(words), score) for score, words in states[:top_n]]
