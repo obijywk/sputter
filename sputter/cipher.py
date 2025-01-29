@@ -102,14 +102,3 @@ def substitution_generate_random_key() -> str:
     key_list = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     random.shuffle(key_list)
     return "".join(key_list)
-
-
-def substitution_permute_key(key: str) -> str:
-    """Permute a key for a substitution cipher, by swapping two letters.
-
-    :param key: The key to permute. Must be a permutation of the alphabet.
-
-    :return: A new key, with two letters swapped.
-    """
-    i, j = sorted(random.sample(range(26), 2))
-    return key[:i] + key[j] + key[i + 1 : j] + key[i] + key[j + 1 :]

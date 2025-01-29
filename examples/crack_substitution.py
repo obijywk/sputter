@@ -4,10 +4,9 @@ from sputter.cipher import (
     substitution_encrypt,
     substitution_decrypt,
     substitution_generate_random_key,
-    substitution_permute_key,
 )
 from sputter.fitness import WordStatistics
-from sputter.mung import uppercase_and_spaces_only
+from sputter.mung import randomly_swap_letters, uppercase_and_spaces_only
 from sputter.optimize import SimulatedAnnealingConfig, simulated_annealing
 
 
@@ -36,7 +35,7 @@ def main():
     results = simulated_annealing(
         objective,
         substitution_generate_random_key(),
-        substitution_permute_key,
+        randomly_swap_letters,
         config=SimulatedAnnealingConfig(
             progress_callback=progress_callback,
         ),
