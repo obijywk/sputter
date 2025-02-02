@@ -4,7 +4,7 @@ import gzip
 import importlib.resources
 import math
 import re
-from typing import Optional
+from typing import Dict, Optional
 
 from sputter.alphabet_trie import AlphabetTrieNode
 
@@ -79,8 +79,8 @@ class WordStatistics:
             )
             lines = gzip.decompress(data_file.read_bytes()).decode("utf-8").split("\n")
         non_letter_re = re.compile(r"[^A-Z]")
-        word_freq = {}
-        total = 0
+        self._word_freq: Dict[str, int] = {}
+        self._word_freq_total = 0
         word_lengths_total = 0
         for line in lines:
             if line:
@@ -91,15 +91,24 @@ class WordStatistics:
                 if re.search(non_letter_re, word):
                     continue
                 int_freq = int(freq)
-                word_freq[word] = int_freq
-                total += int_freq
+                self._word_freq[word] = int_freq
+                self._word_freq_total += int_freq
                 word_lengths_total += int_freq * len(word)
-        self._floor = math.log(0.01 / total)
+        self._floor = math.log(0.01 / self._word_freq_total)
         self._word_log_prob = {
-            word: math.log(freq / total) for word, freq in word_freq.items()
+            word: math.log(freq / self._word_freq_total)
+            for word, freq in self._word_freq.items()
         }
-        self._average_word_length = word_lengths_total / total
+        self._average_word_length = word_lengths_total / self._word_freq_total
         self._trie: Optional[AlphabetTrieNode] = None
+
+    def word_frequencies(self) -> Dict[str, int]:
+        """Return a dictionary from word to number of occurrences of that word."""
+        return self._word_freq
+
+    def word_frequency_total(self) -> int:
+        """Return the total number of occurrences of all words."""
+        return self._word_freq_total
 
     def word_log_prob(
         self, word: str, scale_floor_to_word_length: bool = False
