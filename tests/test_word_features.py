@@ -29,3 +29,4 @@ class TestWordFeatureStatistics(unittest.TestCase):
             UniqueVowelCountFeature,
         )
         self.assertEqual(all_vowels_results[0].feature.count, 5)
+        self.assertEqual(len(all_vowels_results[0].words), 3)
