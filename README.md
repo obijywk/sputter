@@ -4,6 +4,10 @@ sputter is a Statistical PUzzle TexT procEssoR. It is a Python library that can
 be used for many kinds of cryptanalysis and text transformation tasks that are
 often helpful when solving puzzle hunts.
 
+## Documentation
+
+You may refer to the generated [API documentation](https://obijywk.github.io/sputter/).
+
 ## Example usages
 
 The sputter command line tool serves as an example of how to use the sputter

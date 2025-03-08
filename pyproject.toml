@@ -20,6 +20,8 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/obijywk/sputter"
+Documentation = "https://obijywk.github.io/sputter/"
+Repository = "https://github.com/obijywk/sputter"
 
 [project.scripts]
 sputter = "sputter.sputter:app"
