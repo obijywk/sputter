@@ -1,25 +1,50 @@
 [project]
 name = "sputter"
-version = "0.0.1"
-authors = [
-  { name="Matt Gruskin", email="matthew.gruskin@gmail.com" },
-]
+version = "0.1.0"
 description = "a Statistical PUzzle TexT procEssoR library"
 readme = "README.md"
-requires-python = ">=3.10"
-classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+authors = [
+    { name = "Matt Gruskin", email = "matthew.gruskin@gmail.com" }
 ]
-license = {text = "MIT"}
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.15.2",
+]
+
+[project.scripts]
+sputter = "sputter.sputter:app"
 
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.package-data]
-"sputter.data" = ["*"]
+[dependency-groups]
+dev = [
+    "coverage>=7.6.12",
+    "mypy>=1.15.0",
+    "pdoc>=15.0.1",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.5",
+    "ruff>=0.9.10",
+]
 
-[tool.pylint.format]
-max-line-length = "88"
+[tool.ruff.lint]
+preview = true
+select = [
+    "A",
+    "B",
+    "C4",
+    "D",
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "N",
+    "PERF",
+    "PT",
+    "Q",
+    "RET",
+    "SIM",
+    "TC",
+]
+ignore = ["D1", "D203", "D213"]

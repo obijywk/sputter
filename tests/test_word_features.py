@@ -17,16 +17,13 @@ class TestWordFeatureStatistics(unittest.TestCase):
 
     def test_evaluate_words(self):
         """Test evaluating word feature statistics for a set of words."""
-        self.assertIsInstance(
+        assert isinstance(
             self.wfs.evaluate_words(["BALLOON", "BARROOM"])[0].feature,
             DoubleLettersFeature,
         )
         all_vowels_results = self.wfs.evaluate_words(
             ["EDUCATION", "FACETIOUS", "SEQUOIA"]
         )
-        self.assertIsInstance(
-            all_vowels_results[0].feature,
-            UniqueVowelCountFeature,
-        )
-        self.assertEqual(all_vowels_results[0].feature.count, 5)
-        self.assertEqual(len(all_vowels_results[0].words), 3)
+        assert isinstance(all_vowels_results[0].feature, UniqueVowelCountFeature)
+        assert all_vowels_results[0].feature.count == 5
+        assert len(all_vowels_results[0].words) == 3

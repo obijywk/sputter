@@ -3,8 +3,6 @@
 Inspired by https://github.com/rdeits/Collective.jl.
 """
 
-# pylint: disable=too-few-public-methods
-
 from collections import defaultdict
 from dataclasses import dataclass
 import math
@@ -504,10 +502,12 @@ class WordFeatureStatistics:
         for feature, feature_log_prob in self._feature_log_prob.items():
             evals = [
                 feature.evaluate(word, self._ws, precompute)
-                for word, precompute in zip(words, precomputes)
+                for word, precompute in zip(words, precomputes, strict=True)
             ]
             if any(evals):
-                satisfied_words = [word for word, eval in zip(words, evals) if eval]
+                satisfied_words = [
+                    word for word, e in zip(words, evals, strict=True) if e
+                ]
                 results.append(
                     WordFeatureResult(
                         feature,

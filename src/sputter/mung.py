@@ -22,8 +22,7 @@ def uppercase_and_spaces_only(s: str) -> str:
     :return: The converted string.
     """
     s = "".join([c for c in s if c.isalpha() or c.isspace()]).upper()
-    s = re.sub(r"\s+", " ", s)
-    return s
+    return re.sub(r"\s+", " ", s)
 
 
 def randomly_swap_letters(s: str) -> str:

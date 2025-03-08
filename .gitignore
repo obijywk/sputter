@@ -1,9 +1,17 @@
-.coverage
-.mypy_cache
-dist
-docs
-htmlcov
-venv
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
 *.egg-info
-*.pyc
-*__pycache__*
+
+# Coverage
+.coverage
+htmlcov/
+
+# Generated documentation
+docs/
+
+# Virtual environments
+.venv

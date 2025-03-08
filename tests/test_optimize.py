@@ -11,10 +11,10 @@ class OptimizeTestCase(unittest.TestCase):
 
     def test_brute_force(self):
         """Tests the brute_force function."""
-        self.assertEqual(
-            optimize.brute_force(lambda c: -float(ord(c)), ["A", "B", "C"], 2),
-            [("C", -67.0), ("B", -66.0)],
-        )
+        assert optimize.brute_force(lambda c: -float(ord(c)), ["A", "B", "C"], 2) == [
+            ("C", -67.0),
+            ("B", -66.0),
+        ]
 
     def test_simulated_annealing(self):
         """Tests the simulated_annealing function."""
@@ -30,6 +30,6 @@ class OptimizeTestCase(unittest.TestCase):
                 min_temp=1.0,
             ),
         )
-        self.assertEqual(len(results), 10)
-        self.assertEqual(results[0][0], "M")
-        self.assertEqual(results[0][1], 0.0)
+        assert len(results) == 10
+        assert results[0][0] == "M"
+        assert results[0][1] == 0.0

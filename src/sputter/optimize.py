@@ -36,7 +36,7 @@ def brute_force(
 
 
 @dataclass
-class SimulatedAnnealingConfig:
+class SimulatedAnnealingConfig[T]:
     """Configuration for simulated annealing."""
 
     alpha: float = 0.9
@@ -65,7 +65,7 @@ def simulated_annealing(
     initial_state: T,
     neighbor_function: Callable[[T], T],
     top_n: Optional[int] = 10,
-    config: SimulatedAnnealingConfig = SimulatedAnnealingConfig(),
+    config: Optional[SimulatedAnnealingConfig] = None,
 ) -> List[Tuple[T, float]]:
     """Search for optimal inputs for the objective using simulated annealing.
 
@@ -83,6 +83,8 @@ def simulated_annealing(
         ascending order. The list is truncated to the top_n results if top_n is not
         None.
     """
+    if config is None:
+        config = SimulatedAnnealingConfig()
     temperature = config.initial_temp
     state = initial_state
     state_score = objective_function(state)

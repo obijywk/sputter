@@ -14,11 +14,9 @@ class SpacerTestCase(unittest.TestCase):
 
     def test_space(self):
         """Tests the space function."""
-        self.assertEqual(spacer.space("HELLOWORLD", ws=self.ws)[0][0], "HELLO WORLD")
-        self.assertEqual(
-            spacer.space("HELLOXQWORLD", ws=self.ws)[0][0], "HELLO XQ WORLD"
-        )
-        self.assertEqual(
-            spacer.space("THISISALONGERSTRINGTOSPACE", ws=self.ws)[0][0],
-            "THIS IS A LONGER STRING TO SPACE",
+        assert spacer.space("HELLOWORLD", ws=self.ws)[0][0] == "HELLO WORLD"
+        assert spacer.space("HELLOXQWORLD", ws=self.ws)[0][0] == "HELLO XQ WORLD"
+        assert (
+            spacer.space("THISISALONGERSTRINGTOSPACE", ws=self.ws)[0][0]
+            == "THIS IS A LONGER STRING TO SPACE"
         )

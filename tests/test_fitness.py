@@ -13,14 +13,12 @@ class QuadgramStatisticsTestCase(unittest.TestCase):
 
     def test_quadgram_log_prob(self):
         """Test that quadgram log probabilities are computed correctly."""
-        self.assertGreater(
-            self.qs.quadgram_log_prob("THIS"), self.qs.quadgram_log_prob("QXZJ")
-        )
+        assert self.qs.quadgram_log_prob("THIS") > self.qs.quadgram_log_prob("QXZJ")
 
     def test_string_score(self):
         """Test that the score of a common string is greater than that of a rare one."""
-        self.assertGreater(
-            self.qs.string_score("THISISATEST"), self.qs.string_score("QXZJVJIAOLOX")
+        assert self.qs.string_score("THISISATEST") > self.qs.string_score(
+            "QXZJVJIAOLOX"
         )
 
 
@@ -32,27 +30,23 @@ class WordStatisticsTestCase(unittest.TestCase):
 
     def test_word_log_prob(self):
         """Test that word log probabilities are computed correctly."""
-        self.assertGreater(self.ws.word_log_prob("THIS"), self.ws.word_log_prob("RARE"))
-        self.assertEqual(self.ws.word_log_prob("ZXQ"), self.ws.word_log_prob("ZXQJ"))
-        self.assertGreater(
-            self.ws.word_log_prob("ZXQ", True), self.ws.word_log_prob("ZXQJ", True)
-        )
+        assert self.ws.word_log_prob("THIS") > self.ws.word_log_prob("RARE")
+        assert self.ws.word_log_prob("ZXQ") == self.ws.word_log_prob("ZXQJ")
+        assert self.ws.word_log_prob("ZXQ", True) > self.ws.word_log_prob("ZXQJ", True)
 
     def test_spaced_string_score(self):
         """Test that the score of a common string is greater than that of a rare one."""
-        self.assertGreater(
-            self.ws.spaced_string_score("THIS IS A TEST"),
-            self.ws.spaced_string_score("RARE TERMS USED INTERNALLY"),
-        )
-        self.assertGreater(
-            self.ws.spaced_string_score("RARE TERMS USED INTERNALLY"),
-            self.ws.spaced_string_score("QXJZV VJWXZ QZVJ QXJV"),
-        )
+        assert self.ws.spaced_string_score(
+            "THIS IS A TEST"
+        ) > self.ws.spaced_string_score("RARE TERMS USED INTERNALLY")
+        assert self.ws.spaced_string_score(
+            "RARE TERMS USED INTERNALLY"
+        ) > self.ws.spaced_string_score("QXJZV VJWXZ QZVJ QXJV")
 
     def test_trie(self):
         """Test that the trie is built correctly."""
         trie = self.ws.trie()
-        self.assertEqual(trie, self.ws.trie())
-        self.assertEqual(trie.subtrie("THIS").value, self.ws.word_log_prob("THIS"))
-        self.assertEqual(trie.subtrie("RARE").value, self.ws.word_log_prob("RARE"))
-        self.assertIsNone(trie.subtrie("ZXQ"))
+        assert trie == self.ws.trie()
+        assert trie.subtrie("THIS").value == self.ws.word_log_prob("THIS")
+        assert trie.subtrie("RARE").value == self.ws.word_log_prob("RARE")
+        assert trie.subtrie("ZXQ") is None

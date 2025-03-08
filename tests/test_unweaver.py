@@ -15,31 +15,21 @@ class UnweaverTestCase(unittest.TestCase):
 
     def test_unweave(self):
         """Tests the unweave function."""
-        self.assertEqual(
-            unweaver.unweave("TEST", config=unweaver.Config(ws=self.ws))[0][0], ["TEST"]
-        )
-        self.assertEqual(
-            unweaver.unweave("TOENSET", config=unweaver.Config(ws=self.ws))[0][0],
-            ["TEST", "ONE"],
-        )
-        self.assertEqual(
-            unweaver.unweave(
-                "RCAHSEPEBESRERCYAKE",
-                config=unweaver.Config(min_words=3, max_words=3, ws=self.ws),
-            )[0][0],
-            ["RASPBERRY", "CHEESE", "CAKE"],
-        )
-        self.assertEqual(
-            unweaver.unweave(
-                "TFMTHUREUOSDRISNDDDAAAYAYYY",
-                config=unweaver.Config(max_words=4, ws=self.ws),
-            )[0][0],
-            ["THURSDAY", "FRIDAY", "MONDAY", "TUESDAY"],
-        )
-        self.assertEqual(
-            unweaver.unweave(
-                "AINNATERSRCTATHENYIDENOETDORYALONCALTBLRANYD",
-                config=unweaver.Config(max_words=6, ws=self.ws),
-            )[0][0],
-            ["ANARCHY", "INTERSTATE", "NINETY", "DEODORANT", "LOCALLY", "BRAND"],
-        )
+        assert unweaver.unweave("TEST", config=unweaver.Config(ws=self.ws))[0][0] == [
+            "TEST"
+        ]
+        assert unweaver.unweave("TOENSET", config=unweaver.Config(ws=self.ws))[0][
+            0
+        ] == ["TEST", "ONE"]
+        assert unweaver.unweave(
+            "RCAHSEPEBESRERCYAKE",
+            config=unweaver.Config(min_words=3, max_words=3, ws=self.ws),
+        )[0][0] == ["RASPBERRY", "CHEESE", "CAKE"]
+        assert unweaver.unweave(
+            "TFMTHUREUOSDRISNDDDAAAYAYYY",
+            config=unweaver.Config(max_words=4, ws=self.ws),
+        )[0][0] == ["THURSDAY", "FRIDAY", "MONDAY", "TUESDAY"]
+        assert unweaver.unweave(
+            "AINNATERSRCTATHENYIDENOETDORYALONCALTBLRANYD",
+            config=unweaver.Config(max_words=6, ws=self.ws),
+        )[0][0] == ["ANARCHY", "INTERSTATE", "NINETY", "DEODORANT", "LOCALLY", "BRAND"]

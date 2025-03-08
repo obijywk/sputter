@@ -3,7 +3,6 @@
 import itertools
 import random
 
-
 __ORD_A = ord("A")
 
 

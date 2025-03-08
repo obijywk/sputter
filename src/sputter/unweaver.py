@@ -17,7 +17,7 @@ class Config:
     max_words: Optional[int] = None
     """The maximum number of words allowed in the output."""
 
-    state_size_limit: int = 4096
+    state_size_limit: int = 8192
     """The maximum number of states to keep in memory at any given time."""
 
     ws: Optional[WordStatistics] = None
@@ -27,7 +27,7 @@ class Config:
 def unweave(
     s: str,
     top_n: Optional[int] = 10,
-    config: Config = Config(),
+    config: Optional[Config] = None,
 ) -> List[Tuple[List[str], float]]:
     """Separate a string containing multiple interspersed words into separate words.
 
@@ -37,10 +37,13 @@ def unweave(
 
     :return: A list of tuples, where each tuple contains a list of words and its score.
     """
+    if config is None:
+        config = Config()
     ws = config.ws
     if ws is None:
         ws = WordStatistics()
     trie = ws.trie()
+    max_words = config.max_words
 
     @dataclass
     class State:
@@ -56,7 +59,9 @@ def unweave(
         def advance(self, c: str) -> List["State"]:
             """Return the set of states that may be created by adding a character."""
             new_states = []
-            for i, (node, word) in enumerate(zip(self.trie_nodes, self.words)):
+            for i, (node, word) in enumerate(
+                zip(self.trie_nodes, self.words, strict=True)
+            ):
                 new_node = node.subtrie(c)
                 if new_node is not None:
                     node_score = node.value or node.min_descendant_value
@@ -69,7 +74,7 @@ def unweave(
                     new_words = self.words[:i] + [word + c] + self.words[i + 1 :]
                     new_score = self.score + node_score - new_node_score
                     new_states.append(State(new_score, new_nodes, new_words))
-            if not config.max_words or len(self.trie_nodes) < config.max_words:
+            if not max_words or len(self.trie_nodes) < max_words:
                 new_node = trie.subtrie(c)
                 if new_node is not None:
                     new_node_score = new_node.value or new_node.min_descendant_value
