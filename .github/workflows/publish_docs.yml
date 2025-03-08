@@ -1,5 +1,7 @@
 name: Publish documentation
 on: workflow_dispatch
+permissions:
+  contents: write
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -10,7 +12,7 @@ jobs:
     - name: Build documentation
       run: uv run pdoc --output-dir docs src/sputter
     - name: Update gh-pages
-      uses: JamesIves/github-pages-deploy-action@4.7.3
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BRANCH: gh-pages
