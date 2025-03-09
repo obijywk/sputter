@@ -14,13 +14,15 @@ from sputter.mung import (
     uppercase_only,
 )
 from sputter.optimize import brute_force, simulated_annealing, SimulatedAnnealingConfig
+import sputter.spacer as spacer
 import sputter.unweaver as unweaver
 from sputter.word_features import WordFeatureStatistics
 
+import random
 import rich
 from rich.console import Console
 import typer
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 
 app = typer.Typer()
@@ -129,6 +131,56 @@ def unweave(
         results = unweaver.unweave(text, top_n=num_results, config=config)
     for words, score in results:
         rich.print(f"{score:10.2f} {words}")
+
+
+@app.command()
+def reorder(
+    ngrams: List[str],
+    enumeration: Optional[str] = None,
+    num_results: Optional[int] = 5,
+):
+    """Reorder a sequence of ngrams to maximize the likelihood of the resulting text.
+
+    A space-separated enumeration for the resulting text may optionally be provided.
+    """
+    initial_state = tuple(uppercase_only(w) for w in ngrams)
+
+    if enumeration:
+        enumeration_lengths = [int(i) for i in enumeration.split(" ")]
+
+    qs = QuadgramStatistics()
+    ws = WordStatistics()
+
+    def objective(ns: Tuple[str, ...]) -> float:
+        s = "".join(ns)
+        if enumeration:
+            s = spacer.space_with_enumeration(s, enumeration_lengths)
+            return -ws.spaced_string_score(s)
+        return -qs.string_score(s)
+
+    def randomly_swap_ngrams(ns: Tuple[str, ...]) -> Tuple[str, ...]:
+        i, j = sorted(random.sample(range(len(ns)), 2))
+        return ns[:i] + (ns[j],) + ns[i + 1 : j] + (ns[i],) + ns[j + 1 :]
+
+    with console.status("Searching...") as status:
+
+        def progress_callback(
+            temperature: float, state: List[str], state_score: float
+        ) -> None:
+            status.update(f"{temperature:10.2f} {state} {state_score:6.2f}")
+
+        results = simulated_annealing(
+            objective,
+            initial_state,
+            randomly_swap_ngrams,
+            top_n=num_results,
+            config=SimulatedAnnealingConfig(
+                progress_callback=progress_callback,
+            ),
+        )
+
+    for ns, score in results:
+        rich.print(f"{' '.join(ns)} {score:6.2f}")
 
 
 if __name__ == "__main__":

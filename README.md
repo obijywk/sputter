@@ -59,6 +59,15 @@ $ uv run sputter unweave --max-words=5 TFMTHUREUOSDRISNDDDAAAYAYYY
      55.60 ['THUDS', 'FRIDAY', 'MORNAY', 'TUESDAY', 'DAY']
 ```
 
+```
+$ uv run sputter reorder --enumeration "4 2 1 4 2 3 7 7" AND ATE ERC ERE FTH OMM ORD SIS STO THI
+THI SIS ATE STO FTH ERE ORD ERC OMM AND  64.87
+THI SIS ERE STO FTH ERC ORD OMM AND ATE  73.25
+THI SIS ATE STO FTH ORD ERE ERC OMM AND  75.99
+THI SIS FTH ATE STO ORD ERE ERC OMM AND  76.78
+THI SIS ERE STO FTH ATE ORD ERC OMM AND  78.46
+```
+
 ## Development instructions
 
 Install [uv](https://github.com/astral-sh/uv).

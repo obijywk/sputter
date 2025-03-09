@@ -42,3 +42,23 @@ def space(
         states = sorted(new_states)[:state_size_limit]
 
     return [(" ".join(words), score) for score, words in states[:top_n]]
+
+
+def space_with_enumeration(s: str, enumeration: List[int]) -> str:
+    """Insert spaces into unspaced text using an enumeration.
+
+    :param s: The unspaced text. Must only contain uppercase letters.
+    :param enumeration: A list of integers, where each integer is the number of letters in a word.
+    :return: The spaced text.
+
+    :raises ValueError: If the sum of the enumeration does not equal the length of the text.
+    """
+    if sum(enumeration) != len(s):
+        raise ValueError(
+            "The sum of the enumeration must equal the length of the text."
+        )
+    words = []
+    for i in enumeration:
+        words.append(s[:i])
+        s = s[i:]
+    return " ".join(words)

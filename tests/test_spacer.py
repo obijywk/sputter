@@ -1,5 +1,6 @@
 """Tests for the spacer module."""
 
+import pytest
 import unittest
 
 from sputter import fitness
@@ -20,3 +21,18 @@ class SpacerTestCase(unittest.TestCase):
             spacer.space("THISISALONGERSTRINGTOSPACE", ws=self.ws)[0][0]
             == "THIS IS A LONGER STRING TO SPACE"
         )
+
+    def test_space_with_enumeration(self):
+        """Tests the space_with_enumeration function."""
+        assert spacer.space_with_enumeration("HELLOWORLD", [5, 5]) == "HELLO WORLD"
+        assert (
+            spacer.space_with_enumeration(
+                "THISISALONGERSTRINGTOSPACE", [4, 2, 1, 6, 6, 2, 5]
+            )
+            == "THIS IS A LONGER STRING TO SPACE"
+        )
+        with pytest.raises(
+            ValueError,
+            match="The sum of the enumeration must equal the length of the text.",
+        ):
+            spacer.space_with_enumeration("HELLOWORLD", [5, 4])
