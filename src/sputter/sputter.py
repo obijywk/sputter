@@ -80,9 +80,9 @@ def crack_vigenere(
     qs = QuadgramStatistics()
     ws = WordStatistics()
 
-    key_lengths = []
+    key_lengths = set()
     if key_length is not None:
-        key_lengths.append(key_length)
+        key_lengths.add(key_length)
     else:
         key_length_iocs = []
         for i in range(2, 16):
@@ -90,20 +90,16 @@ def crack_vigenere(
             rich.print(f"Delta bar for key length {i:2}: {ioc}")
             key_length_iocs.append((i, ioc))
         key_length_iocs.sort(key=lambda t: t[1], reverse=True)
-        key_lengths = [i for i, _ in key_length_iocs[:5]]
+        key_lengths.update([i for i, _ in key_length_iocs[:5]])
 
-    rich.print(f"Will attempt to decrypt with key lengths: {key_lengths}")
+    rich.print(f"Will attempt to decrypt with key lengths: {sorted(key_lengths)}")
 
     def objective(k):
         return -qs.string_score(vigenere_decrypt(ciphertext, k))
 
-    results = []
-    with console.status("Brute forcing decryption...") as status:
-        for key_length in key_lengths:
-            status.update(f"Brute forcing decryption with key length {key_length}...")
-            key_candidates = [w for w in ws.word_frequencies() if len(w) == key_length]
-            results.extend(brute_force(objective, key_candidates, top_n=num_results))
-    results.sort(key=lambda r: r[1])
+    with console.status("Brute forcing decryption..."):
+        key_candidates = [w for w in ws.word_frequencies() if len(w) in key_lengths]
+        results = brute_force(objective, key_candidates, top_n=num_results)
     for key, score in results[:num_results]:
         rich.print(f"{key} {vigenere_decrypt(ciphertext, key)} {score}")
 
