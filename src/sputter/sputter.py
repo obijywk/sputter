@@ -6,6 +6,7 @@ from sputter.cipher import (
     substitution_generate_random_key,
     vigenere_decrypt,
 )
+from sputter.coincidence import delta_bar
 from sputter.fitness import QuadgramStatistics, WordStatistics
 from sputter.mung import (
     randomly_swap_letters,
@@ -72,18 +73,38 @@ def crack_substitution(ciphertext: str, num_results: Optional[int] = 5):
 
 
 @app.command()
-def crack_vigenere(key_length: int, ciphertext: str, num_results: Optional[int] = 5):
+def crack_vigenere(
+    ciphertext: str, key_length: Optional[int] = None, num_results: Optional[int] = 5
+):
     """Crack a ciphertext encrypted with a Vigenere cipher."""
-    ws = WordStatistics()
-    key_candidates = [w for w in ws.word_frequencies() if len(w) == key_length]
-
     qs = QuadgramStatistics()
+    ws = WordStatistics()
+
+    key_lengths = []
+    if key_length is not None:
+        key_lengths.append(key_length)
+    else:
+        key_length_iocs = []
+        for i in range(2, 16):
+            ioc = delta_bar(ciphertext, i)
+            rich.print(f"Delta bar for key length {i:2}: {ioc}")
+            key_length_iocs.append((i, ioc))
+        key_length_iocs.sort(key=lambda t: t[1], reverse=True)
+        key_lengths = [i for i, _ in key_length_iocs[:5]]
+
+    rich.print(f"Will attempt to decrypt with key lengths: {key_lengths}")
 
     def objective(k):
         return -qs.string_score(vigenere_decrypt(ciphertext, k))
 
-    results = brute_force(objective, key_candidates, top_n=num_results)
-    for key, score in results:
+    results = []
+    with console.status("Brute forcing decryption...") as status:
+        for key_length in key_lengths:
+            status.update(f"Brute forcing decryption with key length {key_length}...")
+            key_candidates = [w for w in ws.word_frequencies() if len(w) == key_length]
+            results.extend(brute_force(objective, key_candidates, top_n=num_results))
+    results.sort(key=lambda r: r[1])
+    for key, score in results[:num_results]:
         rich.print(f"{key} {vigenere_decrypt(ciphertext, key)} {score}")
 
 
