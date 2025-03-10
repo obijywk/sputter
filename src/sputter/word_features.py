@@ -5,10 +5,18 @@ Inspired by https://github.com/rdeits/Collective.jl.
 
 from collections import defaultdict
 from dataclasses import dataclass
+import json
+import logging
 import math
+import os
+import os.path
+import platformdirs
 from typing import Dict, List, Optional, Set
 
 from sputter.fitness import WordStatistics
+
+
+logger = logging.getLogger(__name__)
 
 
 ALPHABET = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
@@ -471,19 +479,46 @@ class WordFeatureStatistics:
         """
         self._ws = ws or WordStatistics()
 
-        self._feature_count: Dict[WordFeature, int] = defaultdict(int)
+        feature_log_prob_json_path = os.path.join(
+            platformdirs.user_cache_dir(appname="sputter"),
+            "word_feature_log_prob.json",
+        )
+        try:
+            if os.path.exists(feature_log_prob_json_path):
+                with open(feature_log_prob_json_path, "r") as f:
+                    feature_log_prob_json = json.load(f)
+                if {repr(ft) for ft in ALL_FEATURES} == set(
+                    feature_log_prob_json.keys()
+                ):
+                    self._feature_log_prob = {}
+                    for ft in ALL_FEATURES:
+                        self._feature_log_prob[ft] = feature_log_prob_json[repr(ft)]
+                    return
+        except Exception as e:
+            logger.warning(f"Failed to read feature log probabilities cache: {e}")
+
+        feature_count: Dict[WordFeature, int] = defaultdict(int)
 
         for word, freq in self._ws.word_frequencies().items():
             precomputes = WordFeaturePrecomputes(word)
             for feature in ALL_FEATURES:
                 if feature.evaluate(word, self._ws, precomputes):
-                    self._feature_count[feature] += freq
+                    feature_count[feature] += freq
 
         word_frequency_total = self._ws.word_frequency_total()
         self._feature_log_prob = {
-            feature: math.log(count / word_frequency_total)
-            for feature, count in self._feature_count.items()
+            feature: math.log(feature_count.get(feature, 0.01) / word_frequency_total)
+            for feature in ALL_FEATURES
         }
+
+        try:
+            os.makedirs(os.path.dirname(feature_log_prob_json_path), exist_ok=True)
+            with open(feature_log_prob_json_path, "w") as f:
+                json.dump(
+                    {repr(ft): lp for ft, lp in self._feature_log_prob.items()}, f
+                )
+        except Exception as e:
+            logger.warning(f"Failed to cache feature log probabilities: {e}")
 
     def evaluate_words(
         self, words: List[str], top_n: Optional[int] = 10

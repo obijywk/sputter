@@ -15,6 +15,7 @@ classifiers = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "platformdirs>=4.3.6",
     "typer>=0.15.2",
 ]
 

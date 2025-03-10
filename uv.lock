@@ -380,6 +380,7 @@ name = "sputter"
 version = "0.1.3"
 source = { editable = "." }
 dependencies = [
+    { name = "platformdirs" },
     { name = "typer" },
 ]
 
@@ -394,7 +395,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "typer", specifier = ">=0.15.2" }]
+requires-dist = [
+    { name = "platformdirs", specifier = ">=4.3.6" },
+    { name = "typer", specifier = ">=0.15.2" },
+]
 
 [package.metadata.requires-dev]
 dev = [

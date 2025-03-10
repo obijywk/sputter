@@ -22,8 +22,8 @@ class TestWordFeatureStatistics(unittest.TestCase):
             DoubleLettersFeature,
         )
         all_vowels_results = self.wfs.evaluate_words(
-            ["EDUCATION", "FACETIOUS", "SEQUOIA"]
+            ["EDUCATION", "FACETIOUS", "SEQUOIA", "BALLOON"]
         )
         assert isinstance(all_vowels_results[0].feature, UniqueVowelCountFeature)
         assert all_vowels_results[0].feature.count == 5
-        assert len(all_vowels_results[0].words) == 3
+        assert set(all_vowels_results[0].words) == {"EDUCATION", "FACETIOUS", "SEQUOIA"}
