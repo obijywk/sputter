@@ -3,7 +3,7 @@
 Inspired by https://github.com/rdeits/Collective.jl.
 """
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from dataclasses import dataclass
 import json
 import logging
@@ -258,6 +258,36 @@ class LetterCountFeature(WordFeature):
 
 
 @dataclass(frozen=True)
+class RepeatedLetterFeature(WordFeature):
+    """Word features based on number of repeated letter occurrences."""
+
+    min_letter_count: int
+    """The number of letters that must be repeated to satisfy this feature."""
+
+    min_repeat_count: int
+    """The number of letter repetitions needed to satisfy this feature."""
+
+    def evaluate(
+        self,
+        word: str,
+        ws: WordStatistics,
+        precomputes: Optional[WordFeaturePrecomputes],
+    ) -> bool:
+        if precomputes:
+            return (
+                sum(c >= self.min_repeat_count for c in precomputes.word_letter_counts)
+                >= self.min_letter_count
+            )
+        return (
+            sum(c >= self.min_repeat_count for c in Counter(word).values())
+            >= self.min_letter_count
+        )
+
+    def __repr__(self) -> str:
+        return f"has at least {self.min_letter_count} letters repeated at least {self.min_repeat_count} times each"
+
+
+@dataclass(frozen=True)
 class UniqueLetterCountFeature(WordFeature):
     """Word features based on number of unique letter occurrences."""
 
@@ -440,6 +470,13 @@ ALL_FEATURES: List[WordFeature] = [
 ]
 ALL_FEATURES.extend(
     [LetterCountFeature(letter, count) for letter in ALPHABET for count in range(1, 5)]
+)
+ALL_FEATURES.extend(
+    [
+        RepeatedLetterFeature(min_letter_count, min_repeat_count)
+        for min_letter_count in range(1, 6)
+        for min_repeat_count in range(2, 5)
+    ]
 )
 ALL_FEATURES.extend([UniqueLetterCountFeature(count) for count in range(1, 27)])
 ALL_FEATURES.extend(
