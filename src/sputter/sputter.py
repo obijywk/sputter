@@ -23,6 +23,7 @@ import rich
 from rich.console import Console
 import typer
 from typing import List, Optional, Tuple
+from typing_extensions import Annotated
 
 
 app = typer.Typer()
@@ -30,7 +31,13 @@ console = Console()
 
 
 @app.command()
-def crack_caesar(ciphertext: str, num_results: Optional[int] = 5):
+def crack_caesar(
+    ciphertext: Annotated[str, typer.Argument(help="The text to decrypt.")],
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
+):
     """Crack a ciphertext encrypted with a Caesar cipher."""
     qs = QuadgramStatistics()
     ciphertext_no_spaces = uppercase_only(ciphertext)
@@ -40,11 +47,17 @@ def crack_caesar(ciphertext: str, num_results: Optional[int] = 5):
 
     results = brute_force(objective, range(26), top_n=num_results)
     for shift, score in results:
-        rich.print(f"{shift:02} {caesar_shift(ciphertext, shift)} {score}")
+        rich.print(f"{score:8.2f} {shift:02} {caesar_shift(ciphertext, shift)}")
 
 
 @app.command()
-def crack_substitution(ciphertext: str, num_results: Optional[int] = 5):
+def crack_substitution(
+    ciphertext: Annotated[str, typer.Argument(help="The text to decrypt.")],
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
+):
     """Crack a ciphertext encrypted with a substitution cipher."""
     ws = WordStatistics()
 
@@ -71,12 +84,20 @@ def crack_substitution(ciphertext: str, num_results: Optional[int] = 5):
         )
 
     for key, score in results:
-        rich.print(f"{key} {score:6.2f} {substitution_decrypt(ciphertext, key)}")
+        rich.print(f"{score:8.2f} {key} {substitution_decrypt(ciphertext, key)}")
 
 
 @app.command()
 def crack_vigenere(
-    ciphertext: str, key_length: Optional[int] = None, num_results: Optional[int] = 5
+    ciphertext: Annotated[str, typer.Argument(help="The text to decrypt.")],
+    key_length: Annotated[
+        Optional[int],
+        typer.Option("--key-length", "-k", help="The length of the key, if known."),
+    ] = None,
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
 ):
     """Crack a ciphertext encrypted with a Vigenere cipher."""
     qs = QuadgramStatistics()
@@ -103,11 +124,17 @@ def crack_vigenere(
         key_candidates = [w for w in ws.word_frequencies() if len(w) in key_lengths]
         results = brute_force(objective, key_candidates, top_n=num_results)
     for key, score in results[:num_results]:
-        rich.print(f"{key} {vigenere_decrypt(ciphertext, key)} {score}")
+        rich.print(f"{score:8.2f} {key} {vigenere_decrypt(ciphertext, key)}")
 
 
 @app.command()
-def evaluate_word_features(words: List[str], num_results: Optional[int] = 5):
+def evaluate_word_features(
+    words: Annotated[List[str], typer.Argument(help="The set of words to evaluate.")],
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
+):
     """Detect statistically interesting features in a set of words."""
     words = [uppercase_only(w) for w in words]
     with console.status("Computing corpus word feature statistics...") as status:
@@ -115,34 +142,26 @@ def evaluate_word_features(words: List[str], num_results: Optional[int] = 5):
         status.update("Computing feature likelihood for input words...")
         results = wfs.evaluate_words(words, top_n=num_results)
     for result in results:
-        rich.print(f"{result.log_prob:10.2f} {result.feature} {result.words}")
-
-
-@app.command()
-def unweave(
-    text: str,
-    min_words: Optional[int] = None,
-    max_words: Optional[int] = None,
-    num_results: Optional[int] = 5,
-):
-    """Separate words that have been "interwoven" into a single ordered sequence."""
-    config = unweaver.Config(min_words=min_words, max_words=max_words)
-    with console.status("Unweaving..."):
-        results = unweaver.unweave(text, top_n=num_results, config=config)
-    for words, score in results:
-        rich.print(f"{score:10.2f} {words}")
+        rich.print(f"{result.log_prob:8.2f} {result.feature} {result.words}")
 
 
 @app.command()
 def reorder(
-    ngrams: List[str],
-    enumeration: Optional[str] = None,
-    num_results: Optional[int] = 5,
+    ngrams: Annotated[List[str], typer.Argument(help="The set of ngrams to order.")],
+    enumeration: Annotated[
+        Optional[str],
+        typer.Option(
+            "--enumeration",
+            "-e",
+            help="A space-separated list of integers indicating an enumeration for the resulting text.",
+        ),
+    ] = None,
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
 ):
-    """Reorder a sequence of ngrams to maximize the likelihood of the resulting text.
-
-    A space-separated enumeration for the resulting text may optionally be provided.
-    """
+    """Reorder a sequence of ngrams to maximize the likelihood of the resulting text."""
     initial_state = tuple(uppercase_only(w) for w in ngrams)
 
     if enumeration:
@@ -180,7 +199,39 @@ def reorder(
         )
 
     for ns, score in results:
-        rich.print(f"{' '.join(ns)} {score:6.2f}")
+        if enumeration:
+            s = spacer.space_with_enumeration("".join(ns), enumeration_lengths)
+        else:
+            s = spacer.space("".join(ns), top_n=1)[0][0]
+        rich.print(f"{score:8.2f} {s}")
+
+
+@app.command()
+def unweave(
+    text: Annotated[str, typer.Argument(help="The text to unweave.")],
+    min_words: Annotated[
+        Optional[int],
+        typer.Option(
+            "--min-words", "-l", help="A lower bound on the number of words to find."
+        ),
+    ] = None,
+    max_words: Annotated[
+        Optional[int],
+        typer.Option(
+            "--max-words", "-u", help="An upper bound on the number of words to find."
+        ),
+    ] = None,
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
+):
+    """Separate words that have been "interwoven" into a single ordered sequence."""
+    config = unweaver.Config(min_words=min_words, max_words=max_words)
+    with console.status("Unweaving..."):
+        results = unweaver.unweave(text, top_n=num_results, config=config)
+    for words, score in results:
+        rich.print(f"{score:8.2f} {words}")
 
 
 if __name__ == "__main__":

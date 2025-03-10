@@ -28,7 +28,12 @@ def brute_force(
     results: List[Tuple[T, float]] = []
     for s in search_space:
         score = objective_function(s)
-        if not results or score < results[-1][1]:
+        if (
+            not results
+            or top_n is None
+            or len(results) < top_n
+            or score < results[-1][1]
+        ):
             bisect.insort(results, (s, score), key=lambda t: t[1])
             if top_n is not None:
                 results = results[:top_n]
@@ -101,11 +106,20 @@ def simulated_annealing(
         if acceptance_probability > random.random():
             state = neighbor_state
             state_score = neighbor_score
-            if not results or state_score < results[-1][1]:
+            if (
+                not results
+                or top_n is None
+                or len(results) < top_n
+                or state_score < results[-1][1]
+            ):
                 result_index = bisect.bisect_left(
                     results, state_score, key=lambda t: t[1]
                 )
-                if not results or results[result_index][0] != state:
+                if (
+                    not results
+                    or result_index >= len(results)
+                    or results[result_index][0] != state
+                ):
                     results.insert(result_index, (state, state_score))
                     if top_n is not None and len(results) > top_n:
                         results = results[:top_n]
