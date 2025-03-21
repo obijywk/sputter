@@ -3,7 +3,7 @@
 Inspired by https://github.com/rdeits/Collective.jl.
 """
 
-from collections import defaultdict, Counter
+from collections import defaultdict
 from dataclasses import dataclass
 import json
 import logging
@@ -203,6 +203,9 @@ class WordFeaturePrecomputes:
 
     __ORD_A = ord("A")
 
+    word: str
+    """The word itself."""
+
     word_letter_counts: List[int]
     """A list of letter counts in the word, where index 0 is A, 1 is B, etc."""
 
@@ -210,6 +213,7 @@ class WordFeaturePrecomputes:
     """The set of letters in the word."""
 
     def __init__(self, word: str):
+        self.word = word
         self.word_letter_counts = [0] * 26
         for letter in word:
             self.word_letter_counts[ord(letter) - WordFeaturePrecomputes.__ORD_A] += 1
@@ -225,9 +229,7 @@ class WordFeature:
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
         """Return true iff the word has this feature."""
         raise NotImplementedError
@@ -245,13 +247,9 @@ class LetterCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return precomputes.get_letter_count(self.letter) >= self.min_count
-        return word.count(self.letter) >= self.min_count
+        return precomputes.get_letter_count(self.letter) >= self.min_count
 
     def __repr__(self) -> str:
         return f"at least {self.min_count} occurrences of {self.letter}"
@@ -269,22 +267,15 @@ class RepeatedLetterFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return (
-                sum(c >= self.min_repeat_count for c in precomputes.word_letter_counts)
-                >= self.min_letter_count
-            )
         return (
-            sum(c >= self.min_repeat_count for c in Counter(word).values())
+            sum(c >= self.min_repeat_count for c in precomputes.word_letter_counts)
             >= self.min_letter_count
         )
 
     def __repr__(self) -> str:
-        return f"has at least {self.min_letter_count} letters repeated at least {self.min_repeat_count} times each"
+        return f"at least {self.min_letter_count} letters repeated at least {self.min_repeat_count} times each"
 
 
 @dataclass(frozen=True)
@@ -296,16 +287,12 @@ class UniqueLetterCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return len(precomputes.letter_bank) == self.count
-        return len(set(word)) == self.count
+        return len(precomputes.letter_bank) == self.count
 
     def __repr__(self) -> str:
-        return f"{self.count} unique letters"
+        return f"exactly {self.count} unique letters"
 
 
 @dataclass(frozen=True)
@@ -317,16 +304,12 @@ class UniqueVowelCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return len(precomputes.letter_bank & VOWELS) == self.count
-        return len(set(word) & VOWELS) == self.count
+        return len(precomputes.letter_bank & VOWELS) == self.count
 
     def __repr__(self) -> str:
-        return f"{self.count} unique vowels"
+        return f"exactly {self.count} unique vowels"
 
 
 @dataclass(frozen=True)
@@ -338,16 +321,12 @@ class UniqueConsonantCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return len(precomputes.letter_bank & CONSONANTS) == self.count
-        return len(set(word) & CONSONANTS) == self.count
+        return len(precomputes.letter_bank & CONSONANTS) == self.count
 
     def __repr__(self) -> str:
-        return f"{self.count} unique consonants"
+        return f"exactly {self.count} unique consonants"
 
 
 @dataclass(frozen=True)
@@ -356,12 +335,10 @@ class AlternatesVowelConsonantFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        last_was_vowel = word[0] in VOWELS
-        for c in word[1:]:
+        last_was_vowel = precomputes.word[0] in VOWELS
+        for c in precomputes.word[1:]:
             if c in VOWELS:
                 if last_was_vowel:
                     return False
@@ -383,16 +360,19 @@ class DoubleLettersFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
         return (
-            sum(1 for i in range(len(word) - 1) if word[i] == word[i + 1]) == self.count
+            sum(
+                1
+                for i in range(len(precomputes.word) - 1)
+                if precomputes.word[i] == precomputes.word[i + 1]
+            )
+            == self.count
         )
 
     def __repr__(self) -> str:
-        return f"{self.count} pairs of double letters"
+        return f"exactly {self.count} pairs of double letters"
 
 
 @dataclass(frozen=True)
@@ -404,16 +384,12 @@ class CardinalDirectionsCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
-        if precomputes:
-            return (
-                sum(precomputes.get_letter_count(c) for c in CARDINAL_DIRECTIONS)
-                >= self.min_count
-            )
-        return sum(1 for c in word if c in CARDINAL_DIRECTIONS) >= self.min_count
+        return (
+            sum(precomputes.get_letter_count(c) for c in CARDINAL_DIRECTIONS)
+            >= self.min_count
+        )
 
     def __repr__(self) -> str:
         return f"at least {self.min_count} cardinal directions"
@@ -428,18 +404,16 @@ class ChemicalElementSymbolCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
         count = 0
         for s in CHEMICAL_ELEMENT_SYMBOLS:
-            if s in word:
+            if s in precomputes.word:
                 count += 1
         return count >= self.min_count
 
     def __repr__(self) -> str:
-        return f"at least {self.min_count} chemical element symbols"
+        return f"at least {self.min_count} unique chemical element symbols"
 
 
 @dataclass(frozen=True)
@@ -451,18 +425,16 @@ class StateAbbreviationCountFeature(WordFeature):
 
     def evaluate(
         self,
-        word: str,
-        ws: WordStatistics,
-        precomputes: Optional[WordFeaturePrecomputes],
+        precomputes: WordFeaturePrecomputes,
     ) -> bool:
         count = 0
         for s in STATE_ABBREVIATIONS:
-            if s in word:
+            if s in precomputes.word:
                 count += 1
         return count >= self.min_count
 
     def __repr__(self) -> str:
-        return f"at least {self.min_count} US state abbreviations"
+        return f"at least {self.min_count} unique US state abbreviations"
 
 
 ALL_FEATURES: List[WordFeature] = [
@@ -534,12 +506,14 @@ class WordFeatureStatistics:
         except Exception as e:
             logger.warning(f"Failed to read feature log probabilities cache: {e}")
 
+        logger.info("Computing word feature log probabilities...")
+
         feature_count: Dict[WordFeature, int] = defaultdict(int)
 
         for word, freq in self._ws.word_frequencies().items():
             precomputes = WordFeaturePrecomputes(word)
             for feature in ALL_FEATURES:
-                if feature.evaluate(word, self._ws, precomputes):
+                if feature.evaluate(precomputes):
                     feature_count[feature] += freq
 
         word_frequency_total = self._ws.word_frequency_total()
@@ -572,10 +546,7 @@ class WordFeatureStatistics:
         precomputes = [WordFeaturePrecomputes(word) for word in words]
         results = []
         for feature, feature_log_prob in self._feature_log_prob.items():
-            evals = [
-                feature.evaluate(word, self._ws, precompute)
-                for word, precompute in zip(words, precomputes, strict=True)
-            ]
+            evals = [feature.evaluate(precompute) for precompute in precomputes]
             if any(evals):
                 satisfied_words = [
                     word for word, e in zip(words, evals, strict=True) if e
