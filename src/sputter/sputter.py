@@ -1,5 +1,6 @@
 """The sputter command line tool."""
 
+from sputter.anagram import anagram_word
 from sputter.cipher import (
     caesar_shift,
     substitution_decrypt,
@@ -28,6 +29,17 @@ from typing_extensions import Annotated
 
 app = typer.Typer()
 console = Console()
+
+
+@app.command()
+def anagram(
+    letters: Annotated[str, typer.Argument(help="The letters to anagram.")],
+):
+    """Find words that can be formed from the given letters."""
+    ws = WordStatistics()
+    results = anagram_word(uppercase_only(letters), ws)
+    for word, score in results:
+        rich.print(f"{score:8.2f} {word}")
 
 
 @app.command()

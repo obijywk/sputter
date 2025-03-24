@@ -10,6 +10,7 @@ class AlphabetTrieNode:
 
     value: Optional[float] = None
     min_descendant_value: Optional[float] = None
+    max_descendant_value: Optional[float] = None
     children: List[Optional["AlphabetTrieNode"]] = field(
         default_factory=lambda: [None] * 26
     )
@@ -29,6 +30,8 @@ class AlphabetTrieNode:
         """Insert a word into the trie."""
         if self.min_descendant_value is None or value < self.min_descendant_value:
             self.min_descendant_value = value
+        if self.max_descendant_value is None or value > self.max_descendant_value:
+            self.max_descendant_value = value
         if not word:
             self.value = value
             return

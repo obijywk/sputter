@@ -17,7 +17,7 @@ class Config:
     max_words: Optional[int] = None
     """The maximum number of words allowed in the output."""
 
-    state_size_limit: int = 8192
+    state_size_limit: int = 16384
     """The maximum number of states to keep in memory at any given time."""
 
     ws: Optional[WordStatistics] = None
@@ -64,22 +64,22 @@ def unweave(
             ):
                 new_node = node.subtrie(c)
                 if new_node is not None:
-                    node_score = node.value or node.min_descendant_value
-                    new_node_score = new_node.value or new_node.min_descendant_value
+                    node_score = node.value or node.max_descendant_value
+                    new_node_score = new_node.value or new_node.max_descendant_value
                     assert node_score is not None
                     assert new_node_score is not None
                     new_nodes = (
                         self.trie_nodes[:i] + [new_node] + self.trie_nodes[i + 1 :]
                     )
                     new_words = self.words[:i] + [word + c] + self.words[i + 1 :]
-                    new_score = self.score + node_score - new_node_score
+                    new_score = self.score - node_score + new_node_score
                     new_states.append(State(new_score, new_nodes, new_words))
             if not max_words or len(self.trie_nodes) < max_words:
                 new_node = trie.subtrie(c)
                 if new_node is not None:
-                    new_node_score = new_node.value or new_node.min_descendant_value
+                    new_node_score = new_node.value or new_node.max_descendant_value
                     assert new_node_score is not None
-                    new_score = self.score - new_node_score
+                    new_score = self.score + new_node_score
                     new_states.append(
                         State(
                             new_score,
@@ -103,7 +103,7 @@ def unweave(
                 if word_set not in word_sets:
                     word_sets.add(word_set)
                     new_states.append(new_state)
-        states = sorted(new_states)[: config.state_size_limit]
+        states = sorted(new_states, reverse=True)[: config.state_size_limit]
     states = [
         state
         for state in states
