@@ -112,4 +112,4 @@ def unweave(
     ]
     if top_n:
         states = states[:top_n]
-    return [(state.words, state.score) for state in states]
+    return [(state.words, -state.score) for state in states]
