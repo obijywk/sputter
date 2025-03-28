@@ -1,6 +1,6 @@
 [project]
 name = "sputter"
-version = "0.1.4"
+version = "0.1.5"
 description = "a Statistical PUzzle TexT procEssoR library"
 readme = "README.md"
 authors = [
