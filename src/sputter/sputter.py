@@ -1,6 +1,6 @@
 """The sputter command line tool."""
 
-from sputter.anagram import anagram_word
+from sputter.anagram import anagram_phrase
 from sputter.cipher import (
     caesar_shift,
     substitution_decrypt,
@@ -34,12 +34,40 @@ console = Console()
 @app.command()
 def anagram(
     letters: Annotated[str, typer.Argument(help="The letters to anagram.")],
+    min_words: Annotated[
+        Optional[int],
+        typer.Option(
+            "--min-words", "-l", help="A lower bound on the number of words to find."
+        ),
+    ] = None,
+    max_words: Annotated[
+        Optional[int],
+        typer.Option(
+            "--max-words", "-u", help="An upper bound on the number of words to find."
+        ),
+    ] = None,
+    num_results: Annotated[
+        int,
+        typer.Option("--num-results", "-n", help="The number of results to return."),
+    ] = 5,
 ):
     """Find words that can be formed from the given letters."""
     ws = WordStatistics()
-    results = anagram_word(uppercase_only(letters), ws)
-    for word, score in results:
-        rich.print(f"{score:8.2f} {word}")
+    with console.status("Searching...") as status:
+
+        def progress_callback(words: List[List[str]], score: float) -> None:
+            status.update(f"{score:8.2f} {words}")
+
+        results = anagram_phrase(
+            uppercase_only(letters),
+            ws,
+            top_n=num_results,
+            min_words=min_words,
+            max_words=max_words,
+            result_callback=progress_callback,
+        )
+    for words, score in results:
+        rich.print(f"{score:8.2f} {words}")
 
 
 @app.command()
